@@ -1,0 +1,35 @@
+﻿<Window x:Class="ForegroundLogger_Managed.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ForegroundLogger_Managed"
+        mc:Ignorable="d" 
+        SnapsToDevicePixels="True" TextOptions.TextFormattingMode="Display"
+        Title="Foreground Logger" MinHeight="75" MinWidth="335" SizeToContent="WidthAndHeight">
+
+    <DockPanel>
+        <StatusBar Height="24" DockPanel.Dock="Bottom">
+            <StatusBarItem>
+                <TextBlock x:Name="statusBarTxt" Margin="1"/>
+            </StatusBarItem>
+        </StatusBar>
+        <Grid Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Label Margin="1">Output Path</Label>
+            <TextBox x:Name="txtOutputPath" Grid.Column="1" Margin="1"/>
+            <Button x:Name="btnFindPath" Grid.Column="2" Click="OnFindPathClick" Padding="5,2" Margin="1">...</Button>
+
+            <Button Grid.Row="1" Grid.ColumnSpan="3" x:Name="btnStartStop" Click="OnStartStopClick" Content="Start" Margin="1"/>
+        </Grid>
+    </DockPanel>
+</Window>
