@@ -13,6 +13,8 @@ namespace ForegroundLogger_Managed
     {
         // dont use invariant or other cultures with / or \, not valid in filenames
         public static readonly string FILEDATEFORMAT = "yyyy MM dd";// CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
+        private const string CSV_TIMEFORMAT = "MM/dd/yyyy HH:mm:ss.fff";
+
         private readonly ConcurrentQueue<ForegroundChangedEventArgs> _logQueue;
         private readonly IsolatedStorageFile _isolatedStorage = IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Assembly, null, null);
 
@@ -40,7 +42,7 @@ namespace ForegroundLogger_Managed
             string filePath = GetFilePathFormat(DateTime.Now);
             using (var isoFile = new IsolatedStorageFileStream(filePath, FileMode.Append, _isolatedStorage))
             using (StreamWriter sw = new StreamWriter(isoFile))
-                foreach (var l in items.Select(i => $"{i.Timestamp.ToString(CultureInfo.InvariantCulture)},{i.Executable},{i.WindowTitle}"))
+                foreach (var l in items.Select(i => $"{i.Timestamp.ToString(CSV_TIMEFORMAT, CultureInfo.InvariantCulture)},{i.Executable},{i.WindowTitle}"))
                     sw.WriteLine(l);
             LinesLogged += items.Count();
         }

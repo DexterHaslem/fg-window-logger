@@ -47,7 +47,7 @@ namespace ForegroundLogger_Managed
 
         private void RaiseForegroundChanged(string exe, string title)
         {
-            ForegroundWindowChanged?.Invoke(new ForegroundChangedEventArgs(exe, title, DateTime.UtcNow));
+            ForegroundWindowChanged?.Invoke(new ForegroundChangedEventArgs(exe, title, DateTime.Now));
         }
 
         private static string GetWindowText(IntPtr hWnd)
