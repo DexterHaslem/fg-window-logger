@@ -26,22 +26,46 @@
         </Grid.ColumnDefinitions>
 
         <ListView ItemsSource="{Binding LogItemsView}" Grid.ColumnSpan="3" MinHeight="100" MinWidth="100"
-                 SelectedValuePath="IsSelected" SelectionMode="Multiple">
+                 SelectedValuePath="IsSelected" SelectionMode="Single">
           <ListView.View>
             <GridView>
               <!-- dont use display member binding, that will convert to string / default converter -->
-              <GridViewColumn Header="Selected">
+              <GridViewColumn Header="Selected" Width="30">
                 <GridViewColumn.CellTemplate>
                   <DataTemplate>
                     <!-- hacky way to notify toplevel selection changed but it works for now-->
                     <CheckBox IsChecked="{Binding IsSelected,Mode=TwoWay}" Unchecked="OnLogSelectionChanged" Checked="OnLogSelectionChanged" />
                   </DataTemplate>
                 </GridViewColumn.CellTemplate>
+                <GridViewColumn.HeaderTemplate>
+                  <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                      <CheckBox Checked="OnHeaderSelectAll" Unchecked="OnHeaderUnselectAll"/>
+                    </StackPanel>
+                  </DataTemplate>
+                </GridViewColumn.HeaderTemplate>
               </GridViewColumn>
-              <GridViewColumn Header="Date" DisplayMemberBinding="{Binding DateString}" Width="100"></GridViewColumn>
+              <GridViewColumn Header="Date" Width="100">
+                <GridViewColumn.CellTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding DateString}"  />
+                    <DataTemplate.Triggers>
+                      <DataTrigger Binding="{Binding IsCurrentLogItem}" Value="True">
+                        <Setter Property="TextBlock.FontWeight" Value="Heavy" />
+                      </DataTrigger>
+                    </DataTemplate.Triggers>
+                  </DataTemplate>
+
+                </GridViewColumn.CellTemplate>
+              </GridViewColumn>
               <GridViewColumn Header="#Items" DisplayMemberBinding="{Binding ItemCount}" Width="50"></GridViewColumn>
             </GridView>
           </ListView.View>
+          <ListView.ItemContainerStyle>
+            <Style TargetType="ListViewItem">
+              <Setter Property="Focusable" Value="false"/>
+            </Style>
+          </ListView.ItemContainerStyle>
         </ListView>
 
         <Button Grid.Row="1" Grid.Column="0" Click="OnStartStopClick"

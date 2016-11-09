@@ -123,9 +123,9 @@ namespace ForegroundLogger_Managed
             _logger?.WriteQueued();
             ++timerCount;
 
-            if (timerCount % FILELOG_UPDATE_RATE == 0)
+            if (_isStarted && timerCount % FILELOG_UPDATE_RATE == 0)
             {
-                _logger?.UpdateCount(LogItems.Where(l => l.IsCurrentLogItem));
+                _logger?.UpdateLogItemsLineCount(LogItems.Where(l => l.IsCurrentLogItem));
                 timerCount = 0;
             }
             UpdateStatusBarText();
@@ -197,6 +197,12 @@ namespace ForegroundLogger_Managed
         public void OnLogSelectionChanged()
         {
             IsExportEnabled = SelectedLogItems.Any();
+        }
+
+        public void OnSelectAll(bool selected)
+        {
+            foreach (var li in LogItems)
+                li.IsSelected = selected;
         }
     }
 }

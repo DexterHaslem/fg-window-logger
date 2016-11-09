@@ -52,8 +52,11 @@ namespace ForegroundLogger_Managed
 
         public IEnumerable<LogItem> GetAllLogs()
         {
-            List<LogItem> items = _isolatedStorage.GetFileNames().Select(f => new LogItem(f)).ToList();
-            return items;
+            // dont use an enumerable here, or else the update log items count will not work right
+            // the lazy fetch fucks it up
+            var ret = _isolatedStorage.GetFileNames().Select(f => new LogItem(f)).ToList();
+            UpdateLogItemsLineCount(ret);
+            return ret;
         }
 
         public string GetFilePathFormat(DateTime time)
@@ -71,7 +74,7 @@ namespace ForegroundLogger_Managed
                 return sr.ReadToEnd();
         }
 
-        public void UpdateCount(IEnumerable<LogItem> items)
+        public void UpdateLogItemsLineCount(IEnumerable<LogItem> items)
         {
             foreach (LogItem item in items)
             {

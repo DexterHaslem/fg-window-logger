@@ -40,5 +40,15 @@ namespace ForegroundLogger_Managed
         {
             _vm.OnLogSelectionChanged();
         }
+
+        private void OnHeaderSelectAll(object sender, RoutedEventArgs e)
+        {
+            _vm.OnSelectAll(true);
+        }
+
+        private void OnHeaderUnselectAll(object sender, RoutedEventArgs e)
+        {
+            _vm.OnSelectAll(false);
+        }
     }
 }
