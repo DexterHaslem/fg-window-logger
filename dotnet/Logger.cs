@@ -5,30 +5,29 @@ using System.Globalization;
 using System.IO;
 using System.IO.IsolatedStorage;
 using System.Linq;
+using System.Text;
 
 namespace ForegroundLogger_Managed
 {
     public class Logger
     {
-        public const string FILEDATEFORMAT = "yyyy mm dd";
-        private static string _filePath;
+        // dont use invariant or other cultures with / or \, not valid in filenames
+        public static readonly string FILEDATEFORMAT = "yyyy MM dd";// CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
         private readonly ConcurrentQueue<ForegroundChangedEventArgs> _logQueue;
-        private IsolatedStorageFile _isolatedStorage = IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Assembly, null, null);
+        private readonly IsolatedStorageFile _isolatedStorage = IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Assembly, null, null);
 
         public int LinesLogged { get; private set; }
         public int QueuedEventsCount => _logQueue.Count;
 
-        public Logger(string path)
+        public Logger()
         {
-            _filePath = path;
             _logQueue = new ConcurrentQueue<ForegroundChangedEventArgs>();
         }
 
-        public void Flush()
+        public void WriteQueued()
         {
             if (_logQueue.IsEmpty)
                 return;
-
             List<ForegroundChangedEventArgs> toLog = new List<ForegroundChangedEventArgs>(_logQueue.Count);
             ForegroundChangedEventArgs curLogItem;
             while (!_logQueue.IsEmpty && _logQueue.TryDequeue(out curLogItem))
@@ -38,7 +37,11 @@ namespace ForegroundLogger_Managed
 
         private void WriteToLog(IEnumerable<ForegroundChangedEventArgs> items)
         {
-            File.AppendAllLines(_filePath, items.Select(i => $"{i.Timestamp.ToString(CultureInfo.InvariantCulture)},{i.Executable},{i.WindowTitle}"));
+            string filePath = GetFilePathFormat(DateTime.Now);
+            using (var isoFile = new IsolatedStorageFileStream(filePath, FileMode.Append, _isolatedStorage))
+            using (StreamWriter sw = new StreamWriter(isoFile))
+                foreach (var l in items.Select(i => $"{i.Timestamp.ToString(CultureInfo.InvariantCulture)},{i.Executable},{i.WindowTitle}"))
+                    sw.WriteLine(l);
             LinesLogged += items.Count();
         }
 
@@ -47,20 +50,56 @@ namespace ForegroundLogger_Managed
             _logQueue.Enqueue(e);
         }
 
-        public void UpdateFilePath(string newPath)
-        {
-            _filePath = newPath;
-        }
-
         public IEnumerable<LogItem> GetAllLogs()
         {
-            return _isolatedStorage.GetFileNames().Select(f => new LogItem(f));
+            List<LogItem> items = _isolatedStorage.GetFileNames().Select(f => new LogItem(f)).ToList();
+            return items;
         }
 
-        
         public string GetFilePathFormat(DateTime time)
         {
             return $"fglog-{time.ToString(FILEDATEFORMAT, CultureInfo.InvariantCulture)}.csv";
+        }
+
+        private string GetLogContents(LogItem logItem)
+        {
+            if (!_isolatedStorage.FileExists(logItem.FilePath))
+                return string.Empty;
+
+            using (var isoFile = new IsolatedStorageFileStream(logItem.FilePath, FileMode.Open, _isolatedStorage))
+            using (StreamReader sr = new StreamReader(isoFile))
+                return sr.ReadToEnd();
+        }
+
+        public void UpdateCount(IEnumerable<LogItem> items)
+        {
+            foreach (LogItem item in items)
+            {
+                string contents = GetLogContents(item);
+                item.ItemCount = string.IsNullOrWhiteSpace(contents) ? 0 :
+                    contents.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).Length;
+            }
+        }
+
+        public void DeleteLog(LogItem selectedLogItem)
+        {
+            // warning already handled by this point
+            if (_isolatedStorage.FileExists(selectedLogItem.FilePath))
+                _isolatedStorage.DeleteFile(selectedLogItem.FilePath);
+        }
+
+        public void SaveLogs(List<LogItem> toList, string destFile)
+        {
+           //toList.OrderBy(i => i.Date).Select(GetLogContents)
+           StringBuilder sb = new StringBuilder();
+           foreach (LogItem i in toList)
+           {
+               var contents = GetLogContents(i);
+                if (!string.IsNullOrWhiteSpace(contents))
+                    sb.Append(contents);
+           }
+
+           File.WriteAllText(destFile, sb.ToString());
         }
     }
 }

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         SnapsToDevicePixels="True" TextOptions.TextFormattingMode="Display"
-        Title="Foreground Logger" MinHeight="75" MinWidth="335" SizeToContent="WidthAndHeight">
+        Title="Foreground Logger" MinHeight="100" MinWidth="250" SizeToContent="WidthAndHeight">
   <DockPanel>
     <StatusBar Height="24" DockPanel.Dock="Bottom">
       <StatusBarItem>
@@ -13,31 +13,44 @@
       </StatusBarItem>
     </StatusBar>
 
-    <Grid Margin="5">
+    <GroupBox Header="Logs" Margin="10">
+      <Grid Margin="2">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="*" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition />
+          <ColumnDefinition />
+          <ColumnDefinition />
+        </Grid.ColumnDefinitions>
 
-      <Grid.RowDefinitions>
-        <RowDefinition Height="Auto" />
-        <RowDefinition Height="Auto" />
-      </Grid.RowDefinitions>
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="Auto" />
-        <ColumnDefinition />
-        <ColumnDefinition Width="Auto"/>
-      </Grid.ColumnDefinitions>
+        <ListView ItemsSource="{Binding LogItemsView}" Grid.ColumnSpan="3" MinHeight="100" MinWidth="100"
+                 SelectedValuePath="IsSelected" SelectionMode="Multiple">
+          <ListView.View>
+            <GridView>
+              <!-- dont use display member binding, that will convert to string / default converter -->
+              <GridViewColumn Header="Selected">
+                <GridViewColumn.CellTemplate>
+                  <DataTemplate>
+                    <!-- hacky way to notify toplevel selection changed but it works for now-->
+                    <CheckBox IsChecked="{Binding IsSelected,Mode=TwoWay}" Unchecked="OnLogSelectionChanged" Checked="OnLogSelectionChanged" />
+                  </DataTemplate>
+                </GridViewColumn.CellTemplate>
+              </GridViewColumn>
+              <GridViewColumn Header="Date" DisplayMemberBinding="{Binding DateString}" Width="100"></GridViewColumn>
+              <GridViewColumn Header="#Items" DisplayMemberBinding="{Binding ItemCount}" Width="50"></GridViewColumn>
+            </GridView>
+          </ListView.View>
+        </ListView>
 
-      <ListView ItemsSource="{Binding Logs}">
-        <ListView.View>
-          <GridView>
-            <GridViewColumn Header="Date" DisplayMemberBinding="{Binding Date}"></GridViewColumn>
-            <GridViewColumn Header="#Items" DisplayMemberBinding="{Binding ItemCount}"></GridViewColumn>
-          </GridView>
-        </ListView.View>
-      </ListView>
-
-      <Button Grid.Row="1" Grid.ColumnSpan="3" Click="OnStartStopClick" 
-              Content="{Binding StartStopButtonText}" 
-              IsEnabled="{Binding IsStartStopButtonEnabled}" 
-              Margin="1"/>
-    </Grid>
+        <Button Grid.Row="1" Grid.Column="0" Click="OnStartStopClick"
+                Content="{Binding StartStopButtonText}"
+                IsEnabled="{Binding IsStartStopButtonEnabled}"
+                Margin="2,0"/>
+        <Button Grid.Row="1" Grid.Column="1" Click="OnExportLogClick" Content="Export..." IsEnabled="{Binding IsExportEnabled}" Margin="2,0"/>
+        <Button Grid.Row="1" Grid.Column="2" Click="OnDeleteLogClick" Content="Delete" IsEnabled="{Binding IsExportEnabled}" Margin="2,0"/>
+      </Grid>
+    </GroupBox>
   </DockPanel>
 </Window>
