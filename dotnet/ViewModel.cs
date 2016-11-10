@@ -27,7 +27,11 @@ namespace ForegroundLogger_Managed
         private int timerCount = 0;
         // update these every X timer ticks
         //private const int STATUS_UPDATE_RATE = 1;
-        private const int FILELOG_UPDATE_RATE = 3;
+        private const int FILELOG_UPDATE_RATE = 5;
+
+        // update all files in list every hour. this will fix display when running it overnight
+        private int updateAllCount = 0;
+        private const int UPDATE_ALL_FILES_RATE = 60 * 60;
 
         private const string START_TEXT = "Start logging";
         private const string STOP_TEXT = "Stop logging";
@@ -39,7 +43,7 @@ namespace ForegroundLogger_Managed
         private bool _isStartStopButtonEnabled;
         private LogItem _selectedLogItem;
         private bool _isExportEnabled;
-        
+
         public ObservableCollection<LogItem> LogItems { get; set; }
 
         public string StatusBarText
@@ -112,7 +116,7 @@ namespace ForegroundLogger_Managed
             StartStopButtonText = START_TEXT;
             _updateTimer = new Timer(OnTimerTick, null, 25, TIMER_TICK_MS);
 
-            LogItems.CollectionChanged += (o,e) =>
+            LogItems.CollectionChanged += (o, e) =>
             {
                 Debug.WriteLine("LogItems.CollectionChanged");
             };
@@ -122,11 +126,20 @@ namespace ForegroundLogger_Managed
         {
             _logger?.WriteQueued();
             ++timerCount;
+            ++updateAllCount;
 
             if (_isStarted && timerCount % FILELOG_UPDATE_RATE == 0)
             {
                 _logger?.UpdateLogItemsLineCount(LogItems.Where(l => l.IsCurrentLogItem));
                 timerCount = 0;
+            }
+
+            if (updateAllCount % UPDATE_ALL_FILES_RATE == 0)
+            {
+                updateAllCount = 0;
+                LogItems.Clear();
+                foreach (var li in _logger.GetAllLogs())
+                    LogItems.Add(li);
             }
             UpdateStatusBarText();
         }
@@ -166,7 +179,7 @@ namespace ForegroundLogger_Managed
         public void OnDeleteLogClick()
         {
             var selectedItemsCopy = SelectedLogItems.ToList();
-            if (selectedItemsCopy.Count < 1) 
+            if (selectedItemsCopy.Count < 1)
                 return;
 
             var itemsChunk = selectedItemsCopy.Count > 1 ? $"selected {selectedItemsCopy.Count} log items?" : $"{selectedItemsCopy[0].DateString} log item?";
