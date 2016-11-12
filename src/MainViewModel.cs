@@ -12,6 +12,7 @@ using System.Windows.Input;
 using ForegroundLogger.Annotations;
 using ForegroundLogger.LogControl;
 using ForegroundLogger.Stats;
+using ForegroundLogger.StatsControl;
 
 namespace ForegroundLogger
 {
@@ -55,12 +56,12 @@ namespace ForegroundLogger
         }
 
         public LogControlViewModel LogControlViewModel { get; private set; }
-        public StatsViewModel StatsViewModel { get; private set; }
+        public StatsControlViewModel StatsControlViewModel { get; private set; }
 
         public MainViewModel(MainWindow owner)
         {
             LogControlViewModel = new LogControlViewModel(owner);
-            StatsViewModel = new StatsViewModel();
+            StatsControlViewModel = new StatsControlViewModel();
 
             owner.CommandBindings.Add(new CommandBinding(LogControlViewModel.StatsCommand, OnLogStats));
         }
@@ -68,7 +69,7 @@ namespace ForegroundLogger
         private void OnLogStats(object sender, ExecutedRoutedEventArgs e)
         {
             IsStatsTabVisible = true;
-            //StatsViewModel.MyText = "farts";
+            //StatsControlViewModel.MyText = "farts";
             SelectedTabIndex = 1;
         }
 

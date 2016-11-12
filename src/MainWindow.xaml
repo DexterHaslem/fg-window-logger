@@ -25,7 +25,7 @@
 
             <TabItem Header="Stats"
                      Visibility="{Binding IsStatsTabVisible, Converter={StaticResource booleanToVisibilityConverter}}">
-                <stats:StatsControl DataContext="{Binding StatsViewModel}" />
+                <stats:StatsControl DataContext="{Binding StatsControlViewModel}" />
             </TabItem>
         </TabControl>
     </DockPanel>
