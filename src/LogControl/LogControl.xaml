@@ -23,7 +23,7 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <ListView ItemsSource="{Binding LogItemsView}" Grid.ColumnSpan="3" 
+            <ListView ItemsSource="{Binding LogItemsView}" Grid.ColumnSpan="4" 
                                   MinHeight="100" MinWidth="100"
                                   SelectedValuePath="IsSelected" SelectionMode="Single">
                 <ListView.View>

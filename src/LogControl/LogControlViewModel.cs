@@ -51,6 +51,8 @@ namespace ForegroundLogger.LogControl
             }
         }
 
+        public event EventHandler StatusTextUpdated;
+
         public string StartStopButtonText
         {
             get { return _startStopButtonText; }
@@ -160,6 +162,7 @@ namespace ForegroundLogger.LogControl
             string logLine = !_isStarted ? "Idle" : $"Running, logged {Logger?.LinesLogged} changes this session";
             //_owner.Dispatcher.Invoke(() => StatusBarTex = logLine);
             StatusBarText = logLine;
+            StatusTextUpdated?.Invoke(this, new EventArgs());
         }
 
         public void OnStartStopLogging(object sender, RoutedEventArgs e)

@@ -64,6 +64,11 @@ namespace ForegroundLogger
             StatsControlViewModel = new StatsControlViewModel();
 
             owner.CommandBindings.Add(new CommandBinding(LogControlViewModel.StatsCommand, OnLogStats));
+
+            LogControlViewModel.StatusTextUpdated += (o, e) =>
+            {
+                StatusBarText = LogControlViewModel.StatusBarText;
+            };
         }
 
         private void OnLogStats(object sender, ExecutedRoutedEventArgs e)
