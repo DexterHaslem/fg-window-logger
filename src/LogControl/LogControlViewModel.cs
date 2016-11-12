@@ -243,6 +243,7 @@ namespace ForegroundLogger.LogControl
         {
             foreach (var li in LogItems)
                 li.IsSelected = (bool)e.Parameter;
+            AreLogButtonsEnabled = SelectedLogItems.Any();
         }
 
         #region INotifyPropertyChanged
