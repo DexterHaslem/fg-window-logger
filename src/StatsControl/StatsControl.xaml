@@ -31,7 +31,7 @@
                                                       Content="Total Time"/>
                                 </GridViewColumn.Header>
                             </GridViewColumn>
-                            <GridViewColumn Header="Window titles">
+                            <GridViewColumn Header="Seen window titles">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding SeenTitles, Converter={StaticResource SeenTitlesStringConverter}}" />
