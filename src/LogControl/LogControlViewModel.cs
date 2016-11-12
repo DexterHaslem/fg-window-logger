@@ -126,13 +126,13 @@ namespace ForegroundLogger.LogControl
             ++TimerCount;
             ++_updateAllCount;
 
-            if (_isStarted && TimerCount % FILELOG_UPDATE_RATE == 0)
+            if (_isStarted && TimerCount >= FILELOG_UPDATE_RATE)
             {
                 Logger?.UpdateLogItemsLineCount(LogItems.Where(l => l.IsCurrentLogItem));
                 TimerCount = 0;
             }
 
-            if (_updateAllCount % UPDATE_ALL_FILES_RATE == 0)
+            if (_updateAllCount >= UPDATE_ALL_FILES_RATE)
             {
                 _updateAllCount = 0;
                 LogItems.Clear();
@@ -178,7 +178,18 @@ namespace ForegroundLogger.LogControl
 
             foreach (var log2Delete in selectedItemsCopy)
             {
-                Logger?.DeleteLog(log2Delete);
+                if (log2Delete.IsCurrentLogItem && _isStarted)
+                {
+                    OnStartStopLogging(this, null);
+                    Logger?.WriteQueued();
+                    // delay the deletion of this file slightly so we dont race condition the stop write
+                    Logger?.DeleteLog(log2Delete);
+                }
+                else
+                {
+                    Logger?.DeleteLog(log2Delete);    
+                }
+                
                 LogItems.Remove(log2Delete);
             }
         }
