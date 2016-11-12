@@ -43,19 +43,18 @@ namespace ForegroundLogger.StatsControl
             }
         }
 
-
         public void SetStats(Logger logger, IEnumerable<LogItem> selectedLogItems)
         {
             StatsGridItems.Clear();
 
             DateTime? prevTimestamp = null;
-            var newStatsItems = new List<StatsGridItem>();
-            
+            var newStatsItems = new List<StatsGridItem>();            
+
             foreach (var logItem in selectedLogItems.OrderBy(li => li.Date))
             {
                 try
                 {
-                    string contents = logger.GetLogContents(logItem);
+                    var contents = logger.GetLogContents(logItem);
                     if (string.IsNullOrWhiteSpace(contents))
                         continue;
 
@@ -101,7 +100,26 @@ namespace ForegroundLogger.StatsControl
                 }
             }
 
-            newStatsItems.ForEach(StatsGridItems.Add);
+            // take our raw list of new stat items (just each raw line)
+            // and actually sum em up and then use that remaining stat item on UI
+            var statsByExe = new Dictionary<string, StatsGridItem>();
+            foreach (var statItem in newStatsItems)
+            {
+                var key = statItem.ExeName;
+                if (!statsByExe.ContainsKey(key))
+                {
+                    // make a new item instead of just stuffing this reference in, because will we be modifying it
+                    statsByExe[key] = new StatsGridItem(key, statItem.TotalTime, statItem.SeenTitles.ToArray());
+                }
+                else
+                {
+                    statsByExe[key].TotalTime += statItem.TotalTime;
+                    statsByExe[key].SeenTitles = statItem.SeenTitles.Union(statsByExe[key].SeenTitles).Distinct().ToList();
+                }
+            }
+
+            foreach (var kvp in statsByExe)
+                StatsGridItems.Add(kvp.Value);
         }
 
         private void UpdateSeenLabelSearch()
