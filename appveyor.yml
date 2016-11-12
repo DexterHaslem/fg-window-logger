@@ -11,7 +11,7 @@ build:
   parallel: true
   verbosity: minimal
 artifacts:
-- path: bin\Release\ForegroundLogger.exe
+- path: src\bin\Release\ForegroundLogger.exe
   name: bin
 deploy:
 - provider: GitHub
