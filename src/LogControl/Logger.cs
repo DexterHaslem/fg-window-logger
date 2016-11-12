@@ -66,7 +66,7 @@ namespace ForegroundLogger
             return $"fglog-{time.ToString(FILEDATEFORMAT, CultureInfo.InvariantCulture)}.csv";
         }
 
-        private string GetLogContents(LogItem logItem)
+        public string GetLogContents(LogItem logItem)
         {
             if (!_isolatedStorage.FileExists(logItem.FilePath))
                 return string.Empty;

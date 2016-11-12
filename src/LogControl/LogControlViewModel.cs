@@ -17,10 +17,9 @@ namespace ForegroundLogger.LogControl
     {
         private bool _isStarted;
         private readonly HookManager _hookManager;
-        private readonly Logger _logger;
+        
         private readonly Timer _updateTimer;
         private const int TIMER_TICK_MS = 1000;
-        
         // update these every X timer ticks
         //private const int STATUS_UPDATE_RATE = 1;
         private const int FILELOG_UPDATE_RATE = 5;
@@ -35,6 +34,8 @@ namespace ForegroundLogger.LogControl
         private string _startStopButtonText;
         private bool _areLogButtonsEnabled;
         private string _statusBarText;
+
+        public Logger Logger { get; private set; }
 
         public ObservableCollection<LogItem> LogItems { get; set; }
 
@@ -99,12 +100,12 @@ namespace ForegroundLogger.LogControl
             _owner = owner;
             _owner.Closing += (o, e) =>
             {
-                _logger?.WriteQueued();
+                Logger?.WriteQueued();
                 _updateTimer.Dispose();
             };
-            _logger = new Logger();
+            Logger = new Logger();
 
-            LogItems = new ObservableCollection<LogItem>(_logger.GetAllLogs());
+            LogItems = new ObservableCollection<LogItem>(Logger.GetAllLogs());
             LogItemsView = (CollectionView)CollectionViewSource.GetDefaultView(LogItems);
 
             // TODO: adorners and clickable
@@ -121,13 +122,13 @@ namespace ForegroundLogger.LogControl
 
         private void OnTimerTick(object state)
         {
-            _logger?.WriteQueued();
+            Logger?.WriteQueued();
             ++TimerCount;
             ++_updateAllCount;
 
             if (_isStarted && TimerCount % FILELOG_UPDATE_RATE == 0)
             {
-                _logger?.UpdateLogItemsLineCount(LogItems.Where(l => l.IsCurrentLogItem));
+                Logger?.UpdateLogItemsLineCount(LogItems.Where(l => l.IsCurrentLogItem));
                 TimerCount = 0;
             }
 
@@ -135,8 +136,8 @@ namespace ForegroundLogger.LogControl
             {
                 _updateAllCount = 0;
                 LogItems.Clear();
-                if (_logger != null)
-                    foreach (var li in _logger.GetAllLogs())
+                if (Logger != null)
+                    foreach (var li in Logger.GetAllLogs())
                         LogItems.Add(li);
             }
             UpdateStatusBarText();
@@ -144,12 +145,12 @@ namespace ForegroundLogger.LogControl
 
         private void OnForegroundWindowChanged(ForegroundChangedEventArgs e)
         {
-            _logger?.QueueEvent(e);
+            Logger?.QueueEvent(e);
         }
 
         private void UpdateStatusBarText()
         {
-            string logLine = !_isStarted ? "Idle" : $"Running, logged {_logger?.LinesLogged} changes this session";
+            string logLine = !_isStarted ? "Idle" : $"Running, logged {Logger?.LinesLogged} changes this session";
             //_owner.Dispatcher.Invoke(() => StatusBarTex = logLine);
             StatusBarText = logLine;
         }
@@ -160,7 +161,7 @@ namespace ForegroundLogger.LogControl
             StartStopButtonText = _isStarted ? STOP_TEXT : START_TEXT;
             _hookManager.SetHookEnabled(_isStarted);
             if (_isStarted && LogItems.Count == 0 || LogItems.All(li => !li.IsCurrentLogItem))
-                LogItems.Add(new LogItem(_logger?.GetFilePathFormat(DateTime.Now)));
+                LogItems.Add(new LogItem(Logger?.GetFilePathFormat(DateTime.Now)));
             UpdateStatusBarText();
         }
 
@@ -177,7 +178,7 @@ namespace ForegroundLogger.LogControl
 
             foreach (var log2Delete in selectedItemsCopy)
             {
-                _logger?.DeleteLog(log2Delete);
+                Logger?.DeleteLog(log2Delete);
                 LogItems.Remove(log2Delete);
             }
         }
@@ -192,7 +193,7 @@ namespace ForegroundLogger.LogControl
             dlg.OverwritePrompt = false;
             dlg.Filter = "Comma Separated Values|*.csv"; // Filter files by extension 
             if (dlg.ShowDialog() == true)
-                _logger?.SaveLogs(SelectedLogItems.ToList(), dlg.FileName);
+                Logger?.SaveLogs(SelectedLogItems.ToList(), dlg.FileName);
         }
 
         public void OnLogSelectionChanged(object sender, ExecutedRoutedEventArgs e)

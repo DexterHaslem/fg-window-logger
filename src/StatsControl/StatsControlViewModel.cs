@@ -44,18 +44,22 @@ namespace ForegroundLogger.StatsControl
         }
 
 
-        public void SetStats(IEnumerable<LogItem> logItems)
+        public void SetStats(Logger logger, IEnumerable<LogItem> selectedLogItems)
         {
             StatsGridItems.Clear();
 
             DateTime? prevTimestamp = null;
             var newStatsItems = new List<StatsGridItem>();
             
-            foreach (var logItem in logItems.OrderBy(li => li.Date))
+            foreach (var logItem in selectedLogItems.OrderBy(li => li.Date))
             {
                 try
                 {
-                    var lines = File.ReadAllLines(logItem.FilePath);
+                    string contents = logger.GetLogContents(logItem);
+                    if (string.IsNullOrWhiteSpace(contents))
+                        continue;
+
+                    var lines = contents.Split(new [] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
                     
                     foreach (var line in lines)
                     {

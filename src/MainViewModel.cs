@@ -68,6 +68,7 @@ namespace ForegroundLogger
 
         private void OnLogStats(object sender, ExecutedRoutedEventArgs e)
         {
+            StatsControlViewModel.SetStats(LogControlViewModel.Logger, LogControlViewModel.SelectedLogItems);
             IsStatsTabVisible = true;
             //StatsControlViewModel.MyText = "farts";
             SelectedTabIndex = 1;
@@ -76,7 +77,7 @@ namespace ForegroundLogger
 
         //private void UpdateStatusBarText()
         //{
-        //    string logLine = !_isStarted ? "Idle" : $"Running, logged {_logger?.LinesLogged} changes this session";
+        //    string logLine = !_isStarted ? "Idle" : $"Running, logged {Logger?.LinesLogged} changes this session";
         //    //_owner.Dispatcher.Invoke(() => StatusBarTex = logLine);
         //    StatusBarText = logLine;
         //}
