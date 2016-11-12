@@ -13,7 +13,7 @@ namespace ForegroundLogger
     {
         // dont use invariant or other cultures with / or \, not valid in filenames
         public static readonly string FILEDATEFORMAT = "yyyy MM dd";// CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
-        private const string CSV_TIMEFORMAT = "MM/dd/yyyy HH:mm:ss.fff";
+        public const string CSV_TIMEFORMAT = "MM/dd/yyyy HH:mm:ss.fff";
 
         private readonly ConcurrentQueue<ForegroundChangedEventArgs> _logQueue;
         private readonly IsolatedStorageFile _isolatedStorage = IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Assembly, null, null);

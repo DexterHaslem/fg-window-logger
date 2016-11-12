@@ -20,7 +20,7 @@
 
         <TabControl SelectedIndex="{Binding SelectedTabIndex}">
             <TabItem Header="Logs">
-                <logControl:LogControl DataContext="{Binding LogControlViewModel}" /> 
+                <logControl:LogControl DataContext="{Binding LogControlViewModel}" />
             </TabItem>
 
             <TabItem Header="Stats"

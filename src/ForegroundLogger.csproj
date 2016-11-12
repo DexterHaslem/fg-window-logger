@@ -61,12 +61,13 @@
     <Compile Include="LogControl\LogControlViewModel.cs" />
     <Compile Include="Models\LogItem.cs" />
     <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="StatsControl\SeenTitlesStringConverter.cs" />
     <Compile Include="StatsControl\StatsControl.xaml.cs">
       <DependentUpon>StatsControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="StatsControl\StatsControlViewModel.cs" />
     <Compile Include="StatsControl\StatsGridItem.cs" />
-    <Compile Include="StorageManager.cs" />
+    <Compile Include="LogControl\StorageManager.cs" />
     <Compile Include="MainViewModel.cs" />
     <Page Include="LogControl\LogControl.xaml">
       <SubType>Designer</SubType>
@@ -80,7 +81,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Logger.cs" />
+    <Compile Include="LogControl\Logger.cs" />
     <Compile Include="Native\HookManager.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

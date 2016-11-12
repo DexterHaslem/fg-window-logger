@@ -2,19 +2,41 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows.Data;
+using System.Windows.Documents;
 using ForegroundLogger.Annotations;
 
 namespace ForegroundLogger.StatsControl
 {
     public class StatsControlViewModel : INotifyPropertyChanged
     {
+        private string _seenLabelSearch;
+
+        public string SeenLabelSearch
+        {
+            get { return _seenLabelSearch; }
+            set
+            {
+                if (value == _seenLabelSearch) return;
+                _seenLabelSearch = value;
+                OnPropertyChanged();
+                UpdateSeenLabelSearch();
+            }
+        }
+    
         public ObservableCollection<StatsGridItem> StatsGridItems { get; set; }
+        public CollectionView StatsGridItemsView { get; set; }
 
         public StatsControlViewModel()
         {
             StatsGridItems = new ObservableCollection<StatsGridItem>();
-
+            StatsGridItemsView = (CollectionView)CollectionViewSource.GetDefaultView(StatsGridItems);
+            StatsGridItemsView.SortDescriptions.Add(new SortDescription("TotalTime", ListSortDirection.Descending));
+            //AdornerLayer.GetAdornerLayer(listViewSortCol)
             for (int i = 0; i < 25; ++i)
             {
                 StatsGridItems.Add(new StatsGridItem(i.ToString(), TimeSpan.FromMinutes(i), "foo", "bar"));
@@ -24,7 +46,75 @@ namespace ForegroundLogger.StatsControl
 
         public void SetStats(IEnumerable<LogItem> logItems)
         {
+            StatsGridItems.Clear();
+
+            DateTime? prevTimestamp = null;
+            var newStatsItems = new List<StatsGridItem>();
             
+            foreach (var logItem in logItems.OrderBy(li => li.Date))
+            {
+                try
+                {
+                    var lines = File.ReadAllLines(logItem.FilePath);
+                    
+                    foreach (var line in lines)
+                    {
+                        // TODO: move me
+                        // format:
+                        // 11/12/2016 08:39:24.924,powershell.exe,posh~git ~ fg-window-logger [stats]
+                        // import thing, always treat chunks[2:] as one thing in case a title had a comma :-(                       
+                        var chunks = line.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+
+                        // if its remotely bogus toss the whole thing
+                        if (chunks.Length < 3)
+                            continue;
+                        
+                        var timestr = chunks[0].Trim();
+                        var exename = chunks[1].Trim();
+                        
+                        DateTime time;
+                        // once again, anything amiss give up the whole line
+                        if (!DateTime.TryParseExact(timestr, Logger.CSV_TIMEFORMAT, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out time))
+                            continue;
+                        
+                        // now we have our time, if this is first entry, set our roll time to it, otherwise we can calculate time spent
+                        TimeSpan prevTimeSpan = TimeSpan.Zero;
+                        if (prevTimestamp != null)
+                        {
+                            prevTimeSpan = time - prevTimestamp.Value;
+                            // update previous entry
+                            newStatsItems.Last().TotalTime = prevTimeSpan;
+                        }
+
+                        prevTimestamp = time;
+                        // make sure to suck rest of any chunks for title
+                        newStatsItems.Add(new StatsGridItem(exename, TimeSpan.Zero, chunks.Skip(2).ToArray()));
+                    }
+                }
+                catch (IOException)
+                {
+                    
+                }
+            }
+
+            newStatsItems.ForEach(StatsGridItems.Add);
+        }
+
+        private void UpdateSeenLabelSearch()
+        {
+            // dont hit property, that calls us
+            if (string.IsNullOrWhiteSpace(_seenLabelSearch))
+                StatsGridItemsView.Filter = null;
+            else
+            {
+                StatsGridItemsView.Filter = o =>
+                {
+                    var item = o as StatsGridItem;
+                    if (item == null)
+                        return true;
+                    return item.SeenTitles != null && item.SeenTitles.Any(t => t.Contains(_seenLabelSearch));                    
+                };
+            }
         }
 
         #region INotifyPropertyChanged
