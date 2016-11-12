@@ -58,6 +58,9 @@ namespace ForegroundLogger.StatsControl
                     foreach (var line in lines)
                     {
                         // TODO: move me
+                        // TODO: pre-parse pass to reorder lines by date, they could become out of date
+                        // if user imports
+
                         // format:
                         // 11/12/2016 08:39:24.924,powershell.exe,posh~git ~ fg-window-logger [stats]
                         // import thing, always treat chunks[2:] as one thing in case a title had a comma :-(                       

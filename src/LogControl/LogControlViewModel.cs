@@ -139,12 +139,12 @@ namespace ForegroundLogger.LogControl
             if (_updateAllCount >= UPDATE_ALL_FILES_RATE)
             {
                 _updateAllCount = 0;
-                _owner.Dispatcher.InvokeAsync(() =>
+                _owner.Dispatcher.Invoke(() =>
                 {
                     LogItems.Clear();
-                    if (Logger != null)
-                        foreach (var li in Logger.GetAllLogs())
-                            LogItems.Add(li);
+                    if (Logger == null) return;
+                    foreach (var li in Logger.GetAllLogs())
+                        LogItems.Add(li);
                 });
             }
             UpdateStatusBarText();
