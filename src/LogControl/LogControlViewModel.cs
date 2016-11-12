@@ -11,9 +11,9 @@ using System.Windows.Data;
 using ForegroundLogger.Annotations;
 using ForegroundLogger.Stats;
 
-namespace ForegroundLogger
+namespace ForegroundLogger.LogControl
 {
-    public class ViewModel : INotifyPropertyChanged
+    public class LogControlViewModel : INotifyPropertyChanged
     {
         private bool _isStarted;
         private readonly HookManager _hookManager;
@@ -24,20 +24,17 @@ namespace ForegroundLogger
         // update these every X timer ticks
         //private const int STATUS_UPDATE_RATE = 1;
         private const int FILELOG_UPDATE_RATE = 5;
-        // update all files in list every hour. this will fix display when running it overnight        
+        // update all files in list every hour. this will fix display when running it overnight
         private const int UPDATE_ALL_FILES_RATE = 60 * 60;
         private int _updateAllCount;
 
         private const string START_TEXT = "Start logging";
         private const string STOP_TEXT = "Stop logging";
-
-        //private readonly string DEFAULT_PATH;
+        
         private readonly MainWindow _owner;
-        private string _statusBarText;
         private string _startStopButtonText;
         private bool _areLogButtonsEnabled;
-        private bool _isStatsTabVisible;
-        private int _selectedTabIndex;
+        private string _statusBarText;
 
         public StatsViewModel StatsViewModel { get; set; }
 
@@ -80,31 +77,9 @@ namespace ForegroundLogger
             }
         }
 
-        public bool IsStatsTabVisible
-        {
-            get { return _isStatsTabVisible; }
-            set
-            {
-                if (value == _isStatsTabVisible) return;
-                _isStatsTabVisible = value;
-                OnPropertyChanged();
-            }
-        }
-
         public int TimerCount { get; private set; }
 
-        public int SelectedTabIndex
-        {
-            get { return _selectedTabIndex; }
-            set
-            {
-                if (value == _selectedTabIndex) return;
-                _selectedTabIndex = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public ViewModel(MainWindow owner)
+        public LogControlViewModel(MainWindow owner)
         {
             _hookManager = new HookManager();
             _hookManager.ForegroundWindowChanged += OnForegroundWindowChanged;
@@ -213,12 +188,12 @@ namespace ForegroundLogger
                 li.IsSelected = selected;
         }
 
-        internal void OnStats()
-        {
-            IsStatsTabVisible = true;
-            //StatsViewModel.MyText = "farts";
-            SelectedTabIndex = 1;
-        }
+        //internal void OnStats()
+        //{
+        //    IsStatsTabVisible = true;
+        //    //StatsViewModel.MyText = "farts";
+        //    SelectedTabIndex = 1;
+        //}
 
         #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
