@@ -67,7 +67,6 @@
     </Compile>
     <Compile Include="StatsControl\StatsControlViewModel.cs" />
     <Compile Include="StatsControl\StatsGridItem.cs" />
-    <Compile Include="LogControl\StorageManager.cs" />
     <Compile Include="MainViewModel.cs" />
     <Page Include="LogControl\LogControl.xaml">
       <SubType>Designer</SubType>

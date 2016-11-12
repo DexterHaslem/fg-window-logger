@@ -85,7 +85,8 @@ namespace ForegroundLogger
 
         private static DateTime ParseDateFromFileName(string path)
         {
-            string timeChunk = path.Replace("fglog-", string.Empty).Split('.').FirstOrDefault();
+            var fileName = new FileInfo(path).Name;
+            string timeChunk = fileName.Replace("fglog-", string.Empty).Split('.').FirstOrDefault();
             return DateTime.ParseExact(timeChunk, Logger.FILEDATEFORMAT, CultureInfo.InvariantCulture);
         }
 
