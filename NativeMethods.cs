@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace ForegroundLogger_Managed
+namespace ForegroundLogger
 {
     public static class NativeMethods
     {

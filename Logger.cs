@@ -7,7 +7,7 @@ using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Text;
 
-namespace ForegroundLogger_Managed
+namespace ForegroundLogger
 {
     public class Logger
     {

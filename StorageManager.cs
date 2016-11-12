@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ForegroundLogger_Managed
+namespace ForegroundLogger
 {
     internal class StorageManager
     {

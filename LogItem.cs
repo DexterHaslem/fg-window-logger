@@ -7,9 +7,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using ForegroundLogger_Managed.Annotations;
+using ForegroundLogger.Annotations;
 
-namespace ForegroundLogger_Managed
+namespace ForegroundLogger
 {
     public class LogItem : INotifyPropertyChanged
     {

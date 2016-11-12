@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-namespace ForegroundLogger_Managed
+namespace ForegroundLogger
 {
     public class HookManager : IDisposable
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ForegroundLogger_Managed
+namespace ForegroundLogger
 {
     public class ForegroundChangedEventArgs : EventArgs
     {

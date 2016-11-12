@@ -5,7 +5,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace ForegroundLogger_Managed
+namespace ForegroundLogger
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace ForegroundLogger_Managed
+namespace ForegroundLogger
 {
     /// <summary>
     /// Interaction logic for App.xaml

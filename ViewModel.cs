@@ -12,9 +12,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Threading;
-using ForegroundLogger_Managed.Annotations;
+using ForegroundLogger.Annotations;
 
-namespace ForegroundLogger_Managed
+namespace ForegroundLogger
 {
     public class ViewModel : INotifyPropertyChanged
     {
