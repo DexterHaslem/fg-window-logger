@@ -1,0 +1,87 @@
+﻿<UserControl x:Class="ForegroundLogger.LogControl.LogControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:ForegroundLogger.LogControl"
+             FocusManager.IsFocusScope="True"
+             Focusable="True"
+             xmlns:foregroundLogger="clr-namespace:ForegroundLogger">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Margin="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <ListView ItemsSource="{Binding LogItemsView}" Grid.ColumnSpan="4" 
+                                  MinHeight="100" MinWidth="100"
+                                  SelectedValuePath="IsSelected" SelectionMode="Single">
+                <ListView.View>
+                    <GridView>
+                        <!-- dont use display member binding, that will convert to string / default converter -->
+                        <GridViewColumn Header="Selected" Width="30">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <!-- hacky way to notify toplevel selection changed but it works for now. beware datacontext is items on these checkboxes -->
+                                    <CheckBox IsChecked="{Binding IsSelected,Mode=TwoWay}" 
+                                                Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:LogControl}}, 
+                                                Path=DataContext.LogSelectionChangedCommand}" 
+                                                CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}, Mode=OneWay}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <CheckBox Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:LogControl}}, 
+                                                  Path=DataContext.LogSelectAllChangedCommand}" 
+                                                  CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}, Mode=OneWay}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Date" Width="100">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DateString}"  />
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsCurrentLogItem}" Value="True">
+                                            <Setter Property="TextBlock.FontWeight" Value="Heavy" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="#Items" DisplayMemberBinding="{Binding ItemCount}" Width="50"></GridViewColumn>
+                    </GridView>
+                </ListView.View>
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="Focusable" Value="false"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+
+            <Button Grid.Row="1" Grid.Column="0" Command="{Binding ImportCommand}" Content="_Import..." Margin="2"/>
+            <Button Grid.Row="1" Grid.Column="1" Command="{Binding ExportCommand}" Content="_Export..." IsEnabled="{Binding AreLogButtonsEnabled}" Margin="2"/>
+            <Button Grid.Row="1" Grid.Column="2" Command="{Binding DeleteCommand}" Content="_Delete" IsEnabled="{Binding AreLogButtonsEnabled}" Margin="2"/>
+            <Button Grid.Row="1" Grid.Column="3" Command="{Binding StatsCommand}" Content="_Stats.." IsEnabled="{Binding AreLogButtonsEnabled}" Margin="2"/>
+            
+        </Grid>
+
+        <Button Grid.Row="1" Grid.Column="0" 
+                Command="{Binding StartStopLoggingCommand}"
+                Content="{Binding StartStopButtonText}"
+                DataContext="{Binding}"
+                                Margin="2"/>
+    </Grid>
+</UserControl>

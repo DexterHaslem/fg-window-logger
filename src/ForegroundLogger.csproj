@@ -54,11 +54,24 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ForegroundChangedEventArgs.cs" />
-    <Compile Include="LogItem.cs" />
+    <Compile Include="Models\ForegroundChangedEventArgs.cs" />
+    <Compile Include="LogControl\LogControl.xaml.cs">
+      <DependentUpon>LogControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LogControl\LogControlViewModel.cs" />
+    <Compile Include="Models\LogItem.cs" />
     <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="StorageManager.cs" />
-    <Compile Include="ViewModel.cs" />
+    <Compile Include="StatsControl\SeenTitlesStringConverter.cs" />
+    <Compile Include="StatsControl\StatsControl.xaml.cs">
+      <DependentUpon>StatsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="StatsControl\StatsControlViewModel.cs" />
+    <Compile Include="StatsControl\StatsGridItem.cs" />
+    <Compile Include="MainViewModel.cs" />
+    <Page Include="LogControl\LogControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -67,15 +80,19 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Logger.cs" />
-    <Compile Include="HookManager.cs" />
+    <Compile Include="LogControl\Logger.cs" />
+    <Compile Include="Native\HookManager.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="StatsControl\StatsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NativeMethods.cs" />
+    <Compile Include="Native\NativeMethods.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

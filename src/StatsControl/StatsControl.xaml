@@ -1,0 +1,73 @@
+﻿<UserControl x:Class="ForegroundLogger.Stats.StatsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:statsControl="clr-namespace:ForegroundLogger.StatsControl">
+    <UserControl.Resources>
+        <statsControl:SeenTitlesStringConverter x:Key="SeenTitlesStringConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Margin="10" 
+                   Text="{Binding StatsHeaderText}" 
+                   FontWeight="Bold" HorizontalAlignment="Left" TextWrapping="Wrap"></TextBlock>
+
+        <TabControl Grid.Row="1">
+            <TabItem Header="Table">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Grid.Row="0">
+                        <Label DockPanel.Dock="Left">Search window titles: </Label>
+                        <TextBox Text="{Binding SeenLabelSearch, UpdateSourceTrigger=PropertyChanged}" />
+                    </DockPanel>
+
+                    <ListView Grid.Row="1" ItemsSource="{Binding StatsGridItems}" 
+                                        MinHeight="100" MinWidth="100" Margin="5,1">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Executable" DisplayMemberBinding="{Binding ExeName}" />
+                                <GridViewColumn DisplayMemberBinding="{Binding TotalTime}">
+                                    <GridViewColumn.Header>
+                                        <GridViewColumnHeader Command="{Binding HeaderSortCommand}" 
+                                                      CommandParameter="TotalTime" 
+                                                      Content="Total Time"/>
+                                    </GridViewColumn.Header>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Avg Duration"  DisplayMemberBinding="{Binding AverageDuration}"/>
+                                <GridViewColumn Header="Window titles">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding SeenTitles, Converter={StaticResource SeenTitlesStringConverter}}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="Focusable" Value="false"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                </Grid>
+            </TabItem>
+
+            <!-- wip -->
+            <TabItem Header="Chart" Visibility="Collapsed">
+                <Grid>
+
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>
+
+
+
