@@ -20,6 +20,7 @@
                 <ColumnDefinition />
                 <ColumnDefinition />
                 <ColumnDefinition />
+                <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
             <ListView ItemsSource="{Binding LogItemsView}" Grid.ColumnSpan="3" 
@@ -70,9 +71,11 @@
                 </ListView.ItemContainerStyle>
             </ListView>
 
-            <Button Grid.Row="1" Grid.Column="0" Command="{Binding ExportCommand}" Content="Export..." IsEnabled="{Binding AreLogButtonsEnabled}" Margin="2"/>
-            <Button Grid.Row="1" Grid.Column="1" Command="{Binding DeleteCommand}" Content="Delete" IsEnabled="{Binding AreLogButtonsEnabled}" Margin="2"/>
-            <Button Grid.Row="1" Grid.Column="2" Command="{Binding StatsCommand}" Content="Stats.." IsEnabled="{Binding AreLogButtonsEnabled}" Margin="2"/>
+            <Button Grid.Row="1" Grid.Column="0" Command="{Binding ImportCommand}" Content="_Import..." Margin="2"/>
+            <Button Grid.Row="1" Grid.Column="1" Command="{Binding ExportCommand}" Content="_Export..." IsEnabled="{Binding AreLogButtonsEnabled}" Margin="2"/>
+            <Button Grid.Row="1" Grid.Column="2" Command="{Binding DeleteCommand}" Content="_Delete" IsEnabled="{Binding AreLogButtonsEnabled}" Margin="2"/>
+            <Button Grid.Row="1" Grid.Column="3" Command="{Binding StatsCommand}" Content="_Stats.." IsEnabled="{Binding AreLogButtonsEnabled}" Margin="2"/>
+            
         </Grid>
 
         <Button Grid.Row="1" Grid.Column="0" 

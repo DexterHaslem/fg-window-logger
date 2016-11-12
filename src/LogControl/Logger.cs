@@ -86,6 +86,13 @@ namespace ForegroundLogger
             return File.ReadAllText(logItem.FilePath);
         }
 
+        public void CopyFileIntoLogs(string filePath)
+        {
+            // TODO: actually read in the file, parse the dates and create 
+            // appropriate date folders
+            //File.Copy(filePath, _appDataFolder);
+        }
+
         public void UpdateLogItemsLineCount(IEnumerable<LogItem> items)
         {
             foreach (var item in items)
@@ -98,7 +105,7 @@ namespace ForegroundLogger
 
         public void DeleteLog(LogItem selectedLogItem)
         {
-            // warning already handled by this point
+            // UI warning already handled by this point
             //if (_isolatedStorage.FileExists(selectedLogItem.FilePath))
             //    _isolatedStorage.DeleteFile(selectedLogItem.FilePath);
             File.Delete(selectedLogItem.FilePath);

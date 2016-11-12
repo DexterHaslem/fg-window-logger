@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using ForegroundLogger.Annotations;
+using Microsoft.Win32;
 
 namespace ForegroundLogger.LogControl
 {
@@ -22,13 +23,13 @@ namespace ForegroundLogger.LogControl
         private const int TIMER_TICK_MS = 1000;
         // update these every X timer ticks
         //private const int STATUS_UPDATE_RATE = 1;
-        private const int FILELOG_UPDATE_RATE = 5;
+        private const int FILELOG_UPDATE_RATE = 2;
         // update all files in list every hour. this will fix display when running it overnight
         private const int UPDATE_ALL_FILES_RATE = 60 * 60;
         private int _updateAllCount;
 
-        private const string START_TEXT = "Start logging";
-        private const string STOP_TEXT = "Stop logging";
+        private const string START_TEXT = "Start _Logging";
+        private const string STOP_TEXT = "Stop _Logging";
         
         private readonly MainWindow _owner;
         private string _startStopButtonText;
@@ -80,6 +81,7 @@ namespace ForegroundLogger.LogControl
 
         // note to self: DONT use C# => shorthand getters, will return new instance of routed command every get. WPF hits em several times
         public ICommand DeleteCommand { get; }
+        public ICommand ImportCommand { get; }
         public ICommand ExportCommand { get; }
         public ICommand StatsCommand { get; }
         public ICommand LogSelectAllChangedCommand { get; }
@@ -91,6 +93,7 @@ namespace ForegroundLogger.LogControl
             StartStopLoggingCommand = new RoutedCommand("StartStopLogging", typeof(LogControl));
             DeleteCommand = new RoutedCommand("Delete", typeof(LogControl));
             ExportCommand = new RoutedCommand("Export", typeof(LogControl));
+            ImportCommand = new RoutedCommand("Import", typeof(LogControl));
             StatsCommand = new RoutedCommand("Stats", typeof(LogControl));
             LogSelectAllChangedCommand = new RoutedCommand("LogSelectAllChanged", typeof(LogControl));
             LogSelectionChangedCommand = new RoutedCommand("LogSelectionChanged", typeof(LogControl));
@@ -113,11 +116,12 @@ namespace ForegroundLogger.LogControl
             StartStopButtonText = START_TEXT;
             _updateTimer = new Timer(OnTimerTick, null, 25, TIMER_TICK_MS);
 
-            owner.CommandBindings.Add(new CommandBinding(DeleteCommand, OnDeleteLog, (sender, args) => args.CanExecute = true));
-            owner.CommandBindings.Add(new CommandBinding(ExportCommand, OnExportLog, (sender, args) => args.CanExecute = true));
+            owner.CommandBindings.Add(new CommandBinding(DeleteCommand, OnDeleteLog));
+            owner.CommandBindings.Add(new CommandBinding(ExportCommand, OnExportLog));
+            owner.CommandBindings.Add(new CommandBinding(ImportCommand, OnImportLog));
             owner.CommandBindings.Add(new CommandBinding(StartStopLoggingCommand, OnStartStopLogging));
-            owner.CommandBindings.Add(new CommandBinding(LogSelectAllChangedCommand, OnLogSelectAllChanged, (sender, args) => args.CanExecute = true));
-            owner.CommandBindings.Add(new CommandBinding(LogSelectionChangedCommand, OnLogSelectionChanged, (sender, args) => args.CanExecute = true));
+            owner.CommandBindings.Add(new CommandBinding(LogSelectAllChangedCommand, OnLogSelectAllChanged));
+            owner.CommandBindings.Add(new CommandBinding(LogSelectionChangedCommand, OnLogSelectionChanged));
         }
 
         private void OnTimerTick(object state)
@@ -196,15 +200,32 @@ namespace ForegroundLogger.LogControl
 
         public void OnExportLog(object sender, ExecutedRoutedEventArgs e)
         {
-            // TODO: just let user save somewhere more friendly then isolated storage
             // if they select multiple logs, squish em into one file
-            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.FileName = "exportfglog"; // Default file name
-            dlg.DefaultExt = ".csv"; // Default file extension
-            dlg.OverwritePrompt = false;
-            dlg.Filter = "Comma Separated Values|*.csv"; // Filter files by extension 
+            var dlg = new SaveFileDialog
+            {
+                FileName = "exportfglog",
+                DefaultExt = ".csv",
+                OverwritePrompt = false,
+                Filter = "Comma Separated Values|*.csv"
+            };
             if (dlg.ShowDialog() == true)
                 Logger?.SaveLogs(SelectedLogItems.ToList(), dlg.FileName);
+        }
+
+        private void OnImportLog(object sender, ExecutedRoutedEventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                DefaultExt = ".csv",
+                Filter = "Comma Separated Values|*.csv"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                Logger?.CopyFileIntoLogs(openFileDialog.FileName);
+                // make next update scan files
+                _updateAllCount = UPDATE_ALL_FILES_RATE;
+            }
         }
 
         public void OnLogSelectionChanged(object sender, ExecutedRoutedEventArgs e)
