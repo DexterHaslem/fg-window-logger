@@ -1,0 +1,27 @@
+version: 0.0.{build}
+configuration: Release
+platform: Any CPU
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_version: '{version}'
+  assembly_file_version: '{version}'
+  assembly_informational_version: '{version}'
+build:
+  parallel: true
+  verbosity: minimal
+artifacts:
+- path: bin\Release\ForegroundLogger.exe
+  name: bin
+deploy:
+- provider: GitHub
+  auth_token:
+    secure: 5HVSm8ubTFKUJYNGyvlweBigt8u5U7TYzG1OU45XKyXVc4mjImENG532OUj9qMwN
+  artifact: bin
+  prerelease: true
+  force_update: true
+notifications:
+- provider: GitHubPullRequest
+  on_build_success: true
+  on_build_failure: true
+  on_build_status_changed: false
