@@ -131,6 +131,7 @@ namespace ForegroundLogger.StatsControl
                 }
                 else
                 {
+                    statsByExe[key].Durations.Add(statItem.TotalTime);
                     statsByExe[key].TotalTime += statItem.TotalTime;
                     statsByExe[key].SeenTitles = statItem.SeenTitles.Union(statsByExe[key].SeenTitles).Distinct().ToList();
                 }

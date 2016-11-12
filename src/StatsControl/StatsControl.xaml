@@ -24,7 +24,7 @@
                     </Grid.RowDefinitions>
 
                     <DockPanel Grid.Row="0">
-                        <Label DockPanel.Dock="Left">Search seen labels</Label>
+                        <Label DockPanel.Dock="Left">Search window titles: </Label>
                         <TextBox Text="{Binding SeenLabelSearch, UpdateSourceTrigger=PropertyChanged}" />
                     </DockPanel>
 
@@ -40,7 +40,8 @@
                                                       Content="Total Time"/>
                                     </GridViewColumn.Header>
                                 </GridViewColumn>
-                                <GridViewColumn Header="Seen window titles">
+                                <GridViewColumn Header="Avg Duration"  DisplayMemberBinding="{Binding AverageDuration}"/>
+                                <GridViewColumn Header="Window titles">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding SeenTitles, Converter={StaticResource SeenTitlesStringConverter}}" />

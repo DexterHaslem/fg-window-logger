@@ -12,9 +12,17 @@ namespace ForegroundLogger.StatsControl
         public TimeSpan TotalTime { get; set; }
         public List<string> SeenTitles { get; set; }
 
+        public List<TimeSpan> Durations { get; set; }
+
+        public TimeSpan AverageDuration
+        {
+            get { return new TimeSpan(Convert.ToInt64(Durations.Average(t => t.Ticks))); }
+        }
+
         public StatsGridItem()
         {
             SeenTitles = new List<string>();
+            Durations = new List<TimeSpan>();
         }
 
         public StatsGridItem(string exe, TimeSpan time) : this()
