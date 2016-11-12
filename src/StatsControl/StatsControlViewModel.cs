@@ -36,11 +36,6 @@ namespace ForegroundLogger.StatsControl
             StatsGridItems = new ObservableCollection<StatsGridItem>();
             StatsGridItemsView = (CollectionView)CollectionViewSource.GetDefaultView(StatsGridItems);
             StatsGridItemsView.SortDescriptions.Add(new SortDescription("TotalTime", ListSortDirection.Descending));
-            //AdornerLayer.GetAdornerLayer(listViewSortCol)
-            for (int i = 0; i < 25; ++i)
-            {
-                StatsGridItems.Add(new StatsGridItem(i.ToString(), TimeSpan.FromMinutes(i), "foo", "bar"));
-            }
         }
 
         public void SetStats(Logger logger, IEnumerable<LogItem> selectedLogItems)
@@ -134,7 +129,7 @@ namespace ForegroundLogger.StatsControl
                     var item = o as StatsGridItem;
                     if (item == null)
                         return true;
-                    return item.SeenTitles != null && item.SeenTitles.Any(t => t.Contains(_seenLabelSearch));                    
+                    return item.SeenTitles != null && item.SeenTitles.Any(t => t.ToUpperInvariant().Contains(_seenLabelSearch.ToUpperInvariant()));
                 };
             }
         }
