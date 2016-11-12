@@ -10,7 +10,6 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using ForegroundLogger.Annotations;
-using ForegroundLogger.Stats;
 
 namespace ForegroundLogger.LogControl
 {
@@ -81,7 +80,7 @@ namespace ForegroundLogger.LogControl
         // note to self: DONT use C# => shorthand getters, will return new instance of routed command every get. WPF hits em several times
         public ICommand DeleteCommand { get; }
         public ICommand ExportCommand { get; }
-        public ICommand StatsCommand { get; } 
+        public ICommand StatsCommand { get; }
         public ICommand LogSelectAllChangedCommand { get; }
         public ICommand LogSelectionChangedCommand { get; }
         public ICommand StartStopLoggingCommand { get; }
@@ -94,7 +93,6 @@ namespace ForegroundLogger.LogControl
             StatsCommand = new RoutedCommand("Stats", typeof(LogControl));
             LogSelectAllChangedCommand = new RoutedCommand("LogSelectAllChanged", typeof(LogControl));
             LogSelectionChangedCommand = new RoutedCommand("LogSelectionChanged", typeof(LogControl));
-
 
             _hookManager = new HookManager();
             _hookManager.ForegroundWindowChanged += OnForegroundWindowChanged;
@@ -116,7 +114,6 @@ namespace ForegroundLogger.LogControl
 
             owner.CommandBindings.Add(new CommandBinding(DeleteCommand, OnDeleteLog, (sender, args) => args.CanExecute = true));
             owner.CommandBindings.Add(new CommandBinding(ExportCommand, OnExportLog, (sender, args) => args.CanExecute = true));
-            //owner.CommandBindings.Add(new CommandBinding(StatsCommand, OnStats));
             owner.CommandBindings.Add(new CommandBinding(StartStopLoggingCommand, OnStartStopLogging));
             owner.CommandBindings.Add(new CommandBinding(LogSelectAllChangedCommand, OnLogSelectAllChanged, (sender, args) => args.CanExecute = true));
             owner.CommandBindings.Add(new CommandBinding(LogSelectionChangedCommand, OnLogSelectionChanged, (sender, args) => args.CanExecute = true));
@@ -208,13 +205,6 @@ namespace ForegroundLogger.LogControl
             foreach (var li in LogItems)
                 li.IsSelected = (bool)e.Parameter;
         }
-
-        //internal void OnStats()
-        //{
-        //    IsStatsTabVisible = true;
-        //    //StatsViewModel.MyText = "farts";
-        //    SelectedTabIndex = 1;
-        //}
 
         #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;

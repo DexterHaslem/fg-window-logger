@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Input;
 using ForegroundLogger.Annotations;
 using ForegroundLogger.LogControl;
 using ForegroundLogger.Stats;
@@ -60,6 +61,15 @@ namespace ForegroundLogger
         {
             LogControlViewModel = new LogControlViewModel(owner);
             StatsViewModel = new StatsViewModel();
+
+            owner.CommandBindings.Add(new CommandBinding(LogControlViewModel.StatsCommand, OnLogStats));
+        }
+
+        private void OnLogStats(object sender, ExecutedRoutedEventArgs e)
+        {
+            IsStatsTabVisible = true;
+            //StatsViewModel.MyText = "farts";
+            SelectedTabIndex = 1;
         }
 
 
