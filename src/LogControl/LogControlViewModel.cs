@@ -139,10 +139,13 @@ namespace ForegroundLogger.LogControl
             if (_updateAllCount >= UPDATE_ALL_FILES_RATE)
             {
                 _updateAllCount = 0;
-                LogItems.Clear();
-                if (Logger != null)
-                    foreach (var li in Logger.GetAllLogs())
-                        LogItems.Add(li);
+                _owner.Dispatcher.InvokeAsync(() =>
+                {
+                    LogItems.Clear();
+                    if (Logger != null)
+                        foreach (var li in Logger.GetAllLogs())
+                            LogItems.Add(li);
+                });
             }
             UpdateStatusBarText();
         }
@@ -165,7 +168,7 @@ namespace ForegroundLogger.LogControl
             StartStopButtonText = _isStarted ? STOP_TEXT : START_TEXT;
             _hookManager.SetHookEnabled(_isStarted);
             if (_isStarted && LogItems.Count == 0 || LogItems.All(li => !li.IsCurrentLogItem))
-                LogItems.Add(new LogItem(Logger?.GetFilePathFormat(DateTime.Now)));
+                LogItems.Add(new LogItem(Logger?.GetFileNameForLogDate(DateTime.Now)));
             UpdateStatusBarText();
         }
 

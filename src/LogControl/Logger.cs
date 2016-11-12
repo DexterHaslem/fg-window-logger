@@ -43,7 +43,7 @@ namespace ForegroundLogger
 
         private void WriteToLog(IEnumerable<ForegroundChangedEventArgs> items)
         {
-            string filePath = GetFilePathFormat(DateTime.Now);
+            string filePath = GetFileNameForLogDate(DateTime.Now);
             //using (var isoFile = new IsolatedStorageFileStream(filePath, FileMode.Append, _isolatedStorage))            
             //using (StreamWriter sw = new StreamWriter(isoFile))
             //    foreach (var l in items.Select(i => $"{i.Timestamp.ToString(CSV_TIMEFORMAT, CultureInfo.InvariantCulture)},{i.Executable},{i.WindowTitle}"))
@@ -62,15 +62,12 @@ namespace ForegroundLogger
         {
             // dont use an enumerable here, or else the update log items count will not work right
             // the lazy fetch fucks it up
-            var ret = Directory.GetFiles(_appDataFolder).Select(f =>
-            {
-                return new LogItem(f);
-            }).ToList();
+            var ret = Directory.GetFiles(_appDataFolder).Select(f => new LogItem(f)).ToList();
             UpdateLogItemsLineCount(ret);
             return ret;
         }
 
-        public string GetFilePathFormat(DateTime time)
+        public string GetFileNameForLogDate(DateTime time)
         {
             return $"fglog-{time.ToString(FILEDATEFORMAT, CultureInfo.InvariantCulture)}.csv";
         }
@@ -88,9 +85,32 @@ namespace ForegroundLogger
 
         public void CopyFileIntoLogs(string filePath)
         {
-            // TODO: actually read in the file, parse the dates and create 
-            // appropriate date folders
-            //File.Copy(filePath, _appDataFolder);
+            var lines = File.ReadAllLines(filePath);
+            var linesByDate = new Dictionary<DateTime, List<string>>();
+
+            // we dont have to parse completely, just bucket into dates
+            foreach (var line in lines)
+            {
+                var chunks = line.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+                if (chunks.Length < 1)
+                    continue;
+
+                DateTime timestamp;
+                if (DateTime.TryParseExact(chunks[0], CSV_TIMEFORMAT, CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeLocal, out timestamp))
+                {
+                    if (!linesByDate.ContainsKey(timestamp))
+                        linesByDate.Add(timestamp, new List<string>());
+                    linesByDate[timestamp].Add(line);
+                }
+            }
+
+            foreach (var kvp in linesByDate)
+            {
+                var fileName = GetFileNameForLogDate(kvp.Key);
+                var path = Path.Combine(_appDataFolder, fileName);
+                File.AppendAllLines(path, kvp.Value);
+            }
         }
 
         public void UpdateLogItemsLineCount(IEnumerable<LogItem> items)
