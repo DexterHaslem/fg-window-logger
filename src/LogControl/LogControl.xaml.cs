@@ -23,6 +23,7 @@ namespace ForegroundLogger.LogControl
         public LogControl()
         {
             InitializeComponent();
+            Focus();
         }
     }
 }

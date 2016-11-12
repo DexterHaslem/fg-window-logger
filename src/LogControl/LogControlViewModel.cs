@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Input;
 using ForegroundLogger.Annotations;
 using ForegroundLogger.Stats;
 
@@ -35,8 +36,6 @@ namespace ForegroundLogger.LogControl
         private string _startStopButtonText;
         private bool _areLogButtonsEnabled;
         private string _statusBarText;
-
-        public StatsViewModel StatsViewModel { get; set; }
 
         public ObservableCollection<LogItem> LogItems { get; set; }
 
@@ -79,8 +78,24 @@ namespace ForegroundLogger.LogControl
 
         public int TimerCount { get; private set; }
 
+        // note to self: DONT use C# => shorthand getters, will return new instance of routed command every get. WPF hits em several times
+        public ICommand DeleteCommand { get; }
+        public ICommand ExportCommand { get; }
+        public ICommand StatsCommand { get; } 
+        public ICommand LogSelectAllChangedCommand { get; }
+        public ICommand LogSelectionChangedCommand { get; }
+        public ICommand StartStopLoggingCommand { get; }
+
         public LogControlViewModel(MainWindow owner)
         {
+            StartStopLoggingCommand = new RoutedCommand("StartStopLogging", typeof(LogControl));
+            DeleteCommand = new RoutedCommand("Delete", typeof(LogControl));
+            ExportCommand = new RoutedCommand("Export", typeof(LogControl));
+            StatsCommand = new RoutedCommand("Stats", typeof(LogControl));
+            LogSelectAllChangedCommand = new RoutedCommand("LogSelectAllChanged", typeof(LogControl));
+            LogSelectionChangedCommand = new RoutedCommand("LogSelectionChanged", typeof(LogControl));
+
+
             _hookManager = new HookManager();
             _hookManager.ForegroundWindowChanged += OnForegroundWindowChanged;
             _owner = owner;
@@ -99,7 +114,12 @@ namespace ForegroundLogger.LogControl
             StartStopButtonText = START_TEXT;
             _updateTimer = new Timer(OnTimerTick, null, 25, TIMER_TICK_MS);
 
-            StatsViewModel = new StatsViewModel();
+            owner.CommandBindings.Add(new CommandBinding(DeleteCommand, OnDeleteLog, (sender, args) => args.CanExecute = true));
+            owner.CommandBindings.Add(new CommandBinding(ExportCommand, OnExportLog, (sender, args) => args.CanExecute = true));
+            //owner.CommandBindings.Add(new CommandBinding(StatsCommand, OnStats));
+            owner.CommandBindings.Add(new CommandBinding(StartStopLoggingCommand, OnStartStopLogging));
+            owner.CommandBindings.Add(new CommandBinding(LogSelectAllChangedCommand, OnLogSelectAllChanged, (sender, args) => args.CanExecute = true));
+            owner.CommandBindings.Add(new CommandBinding(LogSelectionChangedCommand, OnLogSelectionChanged, (sender, args) => args.CanExecute = true));
         }
 
         private void OnTimerTick(object state)
@@ -118,8 +138,9 @@ namespace ForegroundLogger.LogControl
             {
                 _updateAllCount = 0;
                 LogItems.Clear();
-                foreach (var li in _logger.GetAllLogs())
-                    LogItems.Add(li);
+                if (_logger != null)
+                    foreach (var li in _logger.GetAllLogs())
+                        LogItems.Add(li);
             }
             UpdateStatusBarText();
         }
@@ -136,7 +157,7 @@ namespace ForegroundLogger.LogControl
             StatusBarText = logLine;
         }
 
-        public void OnStartStopClick(object sender, RoutedEventArgs e)
+        public void OnStartStopLogging(object sender, RoutedEventArgs e)
         {
             _isStarted = !_isStarted;
             StartStopButtonText = _isStarted ? STOP_TEXT : START_TEXT;
@@ -146,7 +167,7 @@ namespace ForegroundLogger.LogControl
             UpdateStatusBarText();
         }
 
-        public void OnDeleteLogClick()
+        public void OnDeleteLog(object sender, ExecutedRoutedEventArgs e)
         {
             var selectedItemsCopy = SelectedLogItems.ToList();
             if (selectedItemsCopy.Count < 1)
@@ -157,14 +178,14 @@ namespace ForegroundLogger.LogControl
             if (result != MessageBoxResult.Yes)
                 return;
 
-            foreach (var log2delete in selectedItemsCopy)
+            foreach (var log2Delete in selectedItemsCopy)
             {
-                _logger?.DeleteLog(log2delete);
-                LogItems.Remove(log2delete);
+                _logger?.DeleteLog(log2Delete);
+                LogItems.Remove(log2Delete);
             }
         }
 
-        public void OnExportLogClick()
+        public void OnExportLog(object sender, ExecutedRoutedEventArgs e)
         {
             // TODO: just let user save somewhere more friendly then isolated storage
             // if they select multiple logs, squish em into one file
@@ -177,15 +198,15 @@ namespace ForegroundLogger.LogControl
                 _logger?.SaveLogs(SelectedLogItems.ToList(), dlg.FileName);
         }
 
-        public void OnLogSelectionChanged()
+        public void OnLogSelectionChanged(object sender, ExecutedRoutedEventArgs e)
         {
             AreLogButtonsEnabled = SelectedLogItems.Any();
         }
 
-        public void OnSelectAll(bool selected)
+        private void OnLogSelectAllChanged(object sender, ExecutedRoutedEventArgs e)
         {
             foreach (var li in LogItems)
-                li.IsSelected = selected;
+                li.IsSelected = (bool)e.Parameter;
         }
 
         //internal void OnStats()

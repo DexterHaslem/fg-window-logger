@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:stats="clr-namespace:ForegroundLogger.Stats"
         xmlns:logControl="clr-namespace:ForegroundLogger.LogControl"
-        mc:Ignorable="d"
+        FocusManager.IsFocusScope="True"
         SnapsToDevicePixels="True" TextOptions.TextFormattingMode="Display"
         Title="Foreground Logger" Width="400" Height="400" MinHeight="100" MinWidth="250">
     <Window.Resources>
@@ -20,7 +20,7 @@
 
         <TabControl SelectedIndex="{Binding SelectedTabIndex}">
             <TabItem Header="Logs">
-                <logControl:LogControl DataContext="{Binding LogControlViewModel}"/> 
+                <logControl:LogControl DataContext="{Binding LogControlViewModel}" /> 
             </TabItem>
 
             <TabItem Header="Stats"
