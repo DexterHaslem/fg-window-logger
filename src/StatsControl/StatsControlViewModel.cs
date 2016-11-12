@@ -15,6 +15,7 @@ namespace ForegroundLogger.StatsControl
     public class StatsControlViewModel : INotifyPropertyChanged
     {
         private string _seenLabelSearch;
+        private string _statsHeaderText;
 
         public string SeenLabelSearch
         {
@@ -27,7 +28,18 @@ namespace ForegroundLogger.StatsControl
                 UpdateSeenLabelSearch();
             }
         }
-    
+
+        public string StatsHeaderText
+        {
+            get { return _statsHeaderText; }
+            set
+            {
+                if (value == _statsHeaderText) return;
+                _statsHeaderText = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ObservableCollection<StatsGridItem> StatsGridItems { get; set; }
         public CollectionView StatsGridItemsView { get; set; }
 
@@ -45,6 +57,9 @@ namespace ForegroundLogger.StatsControl
             DateTime? prevTimestamp = null;
             var newStatsItems = new List<StatsGridItem>();            
 
+            var minTime = DateTime.MaxValue;
+            var maxTime = DateTime.MinValue;
+            
             foreach (var logItem in selectedLogItems.OrderBy(li => li.Date))
             {
                 try
@@ -77,7 +92,12 @@ namespace ForegroundLogger.StatsControl
                         // once again, anything amiss give up the whole line
                         if (!DateTime.TryParseExact(timestr, Logger.CSV_TIMEFORMAT, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out time))
                             continue;
-                        
+
+                        if (time < minTime)
+                            minTime = time;
+                        if (time > maxTime)
+                            maxTime = time;
+
                         // now we have our time, if this is first entry, set our roll time to it, otherwise we can calculate time spent
                         TimeSpan prevTimeSpan = TimeSpan.Zero;
                         if (prevTimestamp != null)
@@ -90,7 +110,7 @@ namespace ForegroundLogger.StatsControl
                         prevTimestamp = time;
                         // make sure to suck rest of any chunks for title
                         newStatsItems.Add(new StatsGridItem(exename, TimeSpan.Zero, chunks.Skip(2).ToArray()));
-                    }
+                    }                    
                 }
                 catch (IOException)
                 {
@@ -118,6 +138,8 @@ namespace ForegroundLogger.StatsControl
 
             foreach (var kvp in statsByExe)
                 StatsGridItems.Add(kvp.Value);
+            StatsHeaderText =
+                $"Stats for {StatsGridItems.Count} executables between {minTime.Date.ToShortDateString()} - {maxTime.Date.ToShortDateString()}{Environment.NewLine}{newStatsItems.Count} total log items";
         }
 
         private void UpdateSeenLabelSearch()
