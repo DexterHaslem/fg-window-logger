@@ -143,5 +143,10 @@ namespace ForegroundLogger
 
            File.WriteAllText(destFile, sb.ToString());
         }
+
+        public LogItem GetTodayLog()
+        {
+            return new LogItem(Path.Combine(_appDataFolder,GetFileNameForLogDate(DateTime.Now)));
+        }
     }
 }
