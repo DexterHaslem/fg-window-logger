@@ -62,7 +62,7 @@ namespace ForegroundLogger
         {
             // dont use an enumerable here, or else the update log items count will not work right
             // the lazy fetch fucks it up
-            var ret = Directory.GetFiles(_appDataFolder).Select(f => new LogItem(f)).ToList();
+            var ret = Directory.GetFiles(_appDataFolder, "*.csv").Select(f => new LogItem(f)).ToList();
             UpdateLogItemsLineCount(ret);
             return ret;
         }
