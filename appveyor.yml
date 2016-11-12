@@ -1,4 +1,5 @@
 version: 0.0.{build}
+skip_tags: true
 configuration: Release
 platform: Any CPU
 assembly_info:
@@ -7,6 +8,8 @@ assembly_info:
   assembly_version: '{version}'
   assembly_file_version: '{version}'
   assembly_informational_version: '{version}'
+install:
+- cmd: nuget restore
 build:
   parallel: true
   verbosity: minimal
@@ -20,6 +23,8 @@ deploy:
   artifact: bin
   prerelease: true
   force_update: true
+  on:
+    branch: deployment
 notifications:
 - provider: GitHubPullRequest
   on_build_success: true
