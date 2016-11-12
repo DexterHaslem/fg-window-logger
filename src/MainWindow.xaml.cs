@@ -50,5 +50,10 @@ namespace ForegroundLogger
         {
             _vm.OnSelectAll(false);
         }
+
+        private void OnStatsClick(object sender, RoutedEventArgs e)
+        {
+            _vm.OnStats();
+        }
     }
 }

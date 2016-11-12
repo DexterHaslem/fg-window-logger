@@ -3,46 +3,43 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
-using System.Windows.Threading;
 using ForegroundLogger.Annotations;
+using ForegroundLogger.Stats;
 
 namespace ForegroundLogger
 {
     public class ViewModel : INotifyPropertyChanged
     {
-        private bool _isStarted = false;
-        //private const string DEFAULT_FILENAME = "fglog.csv";
+        private bool _isStarted;
         private readonly HookManager _hookManager;
-        private Logger _logger;
+        private readonly Logger _logger;
         private readonly Timer _updateTimer;
         private const int TIMER_TICK_MS = 1000;
-        private int timerCount = 0;
+        
         // update these every X timer ticks
         //private const int STATUS_UPDATE_RATE = 1;
         private const int FILELOG_UPDATE_RATE = 5;
-
-        // update all files in list every hour. this will fix display when running it overnight
-        private int updateAllCount = 0;
+        // update all files in list every hour. this will fix display when running it overnight        
         private const int UPDATE_ALL_FILES_RATE = 60 * 60;
+        private int _updateAllCount;
 
         private const string START_TEXT = "Start logging";
         private const string STOP_TEXT = "Stop logging";
 
         //private readonly string DEFAULT_PATH;
-        private MainWindow _owner;
+        private readonly MainWindow _owner;
         private string _statusBarText;
         private string _startStopButtonText;
-        private bool _isStartStopButtonEnabled;
-        private LogItem _selectedLogItem;
-        private bool _isExportEnabled;
+        private bool _areLogButtonsEnabled;
+        private bool _isStatsTabVisible;
+        private int _selectedTabIndex;
+
+        public StatsViewModel StatsViewModel { get; set; }
 
         public ObservableCollection<LogItem> LogItems { get; set; }
 
@@ -69,29 +66,40 @@ namespace ForegroundLogger
         }
 
         public CollectionView LogItemsView { get; }
-
-        //public ObservableCollection<LogItem> SelectedLogItems { get; set; }
+        
         public IEnumerable<LogItem> SelectedLogItems => LogItems.Where(li => li.IsSelected);
 
-        //public LogItem SelectedLogItem
-        //{
-        //    get { return _selectedLogItem; }
-        //    set
-        //    {
-        //        if (Equals(value, _selectedLogItem)) return;
-        //        _selectedLogItem = value;
-        //        IsExportEnabled = value != null;
-        //        OnPropertyChanged();
-        //    }
-        //}
-
-        public bool IsExportEnabled
+        public bool AreLogButtonsEnabled
         {
-            get { return _isExportEnabled; }
+            get { return _areLogButtonsEnabled; }
             set
             {
-                if (value == _isExportEnabled) return;
-                _isExportEnabled = value;
+                if (value == _areLogButtonsEnabled) return;
+                _areLogButtonsEnabled = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool IsStatsTabVisible
+        {
+            get { return _isStatsTabVisible; }
+            set
+            {
+                if (value == _isStatsTabVisible) return;
+                _isStatsTabVisible = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public int TimerCount { get; private set; }
+
+        public int SelectedTabIndex
+        {
+            get { return _selectedTabIndex; }
+            set
+            {
+                if (value == _selectedTabIndex) return;
+                _selectedTabIndex = value;
                 OnPropertyChanged();
             }
         }
@@ -116,27 +124,24 @@ namespace ForegroundLogger
             StartStopButtonText = START_TEXT;
             _updateTimer = new Timer(OnTimerTick, null, 25, TIMER_TICK_MS);
 
-            LogItems.CollectionChanged += (o, e) =>
-            {
-                Debug.WriteLine("LogItems.CollectionChanged");
-            };
+            StatsViewModel = new StatsViewModel();
         }
 
         private void OnTimerTick(object state)
         {
             _logger?.WriteQueued();
-            ++timerCount;
-            ++updateAllCount;
+            ++TimerCount;
+            ++_updateAllCount;
 
-            if (_isStarted && timerCount % FILELOG_UPDATE_RATE == 0)
+            if (_isStarted && TimerCount % FILELOG_UPDATE_RATE == 0)
             {
                 _logger?.UpdateLogItemsLineCount(LogItems.Where(l => l.IsCurrentLogItem));
-                timerCount = 0;
+                TimerCount = 0;
             }
 
-            if (updateAllCount % UPDATE_ALL_FILES_RATE == 0)
+            if (_updateAllCount % UPDATE_ALL_FILES_RATE == 0)
             {
-                updateAllCount = 0;
+                _updateAllCount = 0;
                 LogItems.Clear();
                 foreach (var li in _logger.GetAllLogs())
                     LogItems.Add(li);
@@ -165,16 +170,6 @@ namespace ForegroundLogger
                 LogItems.Add(new LogItem(_logger?.GetFilePathFormat(DateTime.Now)));
             UpdateStatusBarText();
         }
-
-        #region INotifyPropertyChanged
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        #endregion
 
         public void OnDeleteLogClick()
         {
@@ -209,7 +204,7 @@ namespace ForegroundLogger
 
         public void OnLogSelectionChanged()
         {
-            IsExportEnabled = SelectedLogItems.Any();
+            AreLogButtonsEnabled = SelectedLogItems.Any();
         }
 
         public void OnSelectAll(bool selected)
@@ -217,5 +212,22 @@ namespace ForegroundLogger
             foreach (var li in LogItems)
                 li.IsSelected = selected;
         }
+
+        internal void OnStats()
+        {
+            IsStatsTabVisible = true;
+            //StatsViewModel.MyText = "farts";
+            SelectedTabIndex = 1;
+        }
+
+        #region INotifyPropertyChanged
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
     }
 }
